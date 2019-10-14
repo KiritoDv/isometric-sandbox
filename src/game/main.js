@@ -26,8 +26,10 @@ var currentSlot = 0;
 var slots;
 let cameraLocation;
 var socket;
+var users = {};
+var id = "";
 function setup() {
-	socket = io('http://localhost:8454');
+	socket = io('http://localhost:8454', { forceNew: true });
 	slots = ["Grass", "Dirt", "Stone", "Wool", "SmallStone"];
 	const canvasElt = createCanvas(windowWidth, windowHeight).elt;
 	canvasElt.style.width = '100%', canvasElt.style.height = '100%';
@@ -45,10 +47,28 @@ function setup() {
 		}
 	}
 	socket.emit("defaults", map.points)
+	socket.emit("join", {
+		nick: generate(),
+		color: randomColor()
+	})
+	
+	socket.on('userConnected', (res) => {
+		id = res;
+		console.log("ID: "+res)
+	})
+
+	socket.on('userJoin', (res) => {
+		users = res;
+		console.log(res)
+	})
 
 	socket.on('updateMap', (res) => {
 		var data = JSON.parse(res);
 		map.points[data.id] = data.block;
+	})
+
+	socket.on('updateCursor', (m) => {
+		users[m.id] = m.u;
 	})
 
 	socket.on('loadMap', (m) => {
@@ -84,7 +104,7 @@ function draw() {
 	var a = this.map.points.find(a => a.x == xC && a.y == yC && a.z == 1);	
 
 	var gX = Math.round(((xC - yC) * (32 / 2)))
-	var gY = Math.round(((xC + yC) * (32 / 4)))	
+	var gY = Math.round(((xC + yC) * (32 / 4)))
 
 	strokeWeight(1);
 
@@ -128,21 +148,8 @@ function draw() {
 		line(0, -16, 0, 0)
 		line(32, -16, 32, 0)
 		line(16, -8, 16, 8)
-		line(16, -24, 16, -8)		
-		
-		pop()
-	}
+		line(16, -24, 16, -8)						
 
-	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
-		push()	
-		translate(baseX + gX, (baseY + gY)+8)
-			
-		translate(0, -16)
-		line(16, -8, 0, 0);
-		line(16, 8, 0, 0);
-		line(32, 0, 16, -8);
-		line(32, 0, 16, 8);
-		
 		pop()
 	}
 
@@ -164,6 +171,22 @@ function draw() {
 		}
 	})	
 
+	Object.keys(users).forEach(user => {
+		var u = users[user]		
+		if(user != id){
+			var gX = u.x
+			var gY = u.y
+			push()
+			stroke(u.c.r, u.c.g, u.c.b)
+			translate(baseX + gX, (baseY + gY)+8)
+			line(16, -8, 0, 0);
+			line(16, 8, 0, 0);
+			line(32, 0, 16, -8);
+			line(32, 0, 16, 8);
+			pop()
+		}
+	})
+
 	if(xC >= 0 && xC < map.mapX && yC >= 0 && yC < map.mapY){
 		push()	
 		translate(baseX + gX, (baseY + gY)+8)
@@ -175,6 +198,12 @@ function draw() {
 		line(32, 0, 16, 8);
 		
 		pop()
+
+		socket.emit("updateCursor", {
+			id: id,
+			x: gX,
+			y: gY
+		})
 	}
 	
 	var ba = [0, 1, 2, 3, 4, 5, 6]
@@ -217,6 +246,10 @@ function draw() {
 	text("[ WASD ] - Camera Movement", 20, 55);
 	text("[ Left Click ] - Break Block", 20, 70);
 	text("[ Right Click ] - Place Block", 20, 85);
+	text("Users", 20, 105);
+	Object.values(users).map((u, i) => {
+		text("- "+u.nick, 20, 105 + ((i+1) * 20));
+	})
 
 	//var xC = (camera.mouseX / 16 + camera.mouseX / 16) / 2;
 	//var yC = ((camera.mouseY*8) / 32 - (camera.mouseX / 8)) /2;
