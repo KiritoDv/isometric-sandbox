@@ -1,0 +1,3 @@
+class Grass extends ITile{
+    
+}

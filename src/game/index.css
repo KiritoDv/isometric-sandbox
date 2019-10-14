@@ -1,0 +1,10 @@
+@font-face {
+    font-family: "04B";
+    src: url("http://142.93.88.25/food-drop/assets/04B.ttf");    
+}
+
+body{
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
