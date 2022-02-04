@@ -7,7 +7,7 @@ class Tilemap{
         this.points = [];
     }
 
-    setTile(x, y, z, tile){        
-        this.points.push({"x": x, "y": y, "z": z, "tile": tile, "d": true})
+    setTile(x, y, z, tile, metadata){
+        this.points.push({"x": x, "y": y, "z": z, "tile": tile, "d": true, "metadata": metadata})
     }
 }

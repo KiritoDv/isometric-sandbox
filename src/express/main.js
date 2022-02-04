@@ -5,7 +5,7 @@ const path = require('path');
 
 app.use(express.static(path.join(__dirname, "..", "game")));
 
-app.get("/", (req, res)=>{    
+app.get("/", (req, res)=>{
     res.sendFile(path.join(__dirname, "..", "game", "index.html"))
 })
 
@@ -27,7 +27,7 @@ io.on('connection', socket => {
             nick: d.nick,
             x: 0,
             y: 0,
-            c: d.color 
+            c: d.color
         }
         io.emit("userJoin", users)
         socket.emit("userConnected", socket.id)
@@ -49,9 +49,9 @@ io.on('connection', socket => {
         delete users[socket.id];
     })
 
-    socket.on('updateMap', (res) => {        
-        var data = JSON.parse(res);        
-        
+    socket.on('updateMap', (res) => {
+        var data = JSON.parse(res);
+
         points[data.id] = data.block;
         io.emit('updateMap', res)
     })

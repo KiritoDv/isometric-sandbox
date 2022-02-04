@@ -11,7 +11,7 @@ class IsometricPicker {
         }
 
         var tileSegment = this.calculateIsoSegment(worldPosition, nonIsoTilePosition);
-        
+
         var tilePosition = {
             x: nonIsoTilePosition.y + nonIsoTilePosition.x,
             y: nonIsoTilePosition.x - nonIsoTilePosition.y -1
